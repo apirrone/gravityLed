@@ -4,10 +4,11 @@
 #include <unistd.h>
 #include <ncurses.h>
 
-#define W 8
-#define H 16
-#define GRAN 100 // granularité simu
-#define NB_BALLS 15
+#define W 50
+#define H 50
+#define GRAN 100 // granularité simu (précision)
+#define NB_BALLS 100
+#define ATTENUATION 0.8
 
 enum directions {UP=0, DOWN=1, RIGHT=2, LEFT=3};
 
@@ -18,7 +19,7 @@ typedef struct vec{
 class Ball{
 public :
   vec pos;
-  float mass;  //  kgs
+  float mass;
   vec speed;
   
   Ball(float x, float y, float mass){
@@ -27,23 +28,6 @@ public :
     this->mass = mass;
     this->speed.x = 0.;
     this->speed.y = 0.;
-  }
-
-  void move(int dir){
-    switch(dir){
-    case UP : 
-      
-      break;
-    case DOWN : 
-
-      break;
-    case LEFT : 
-
-      break;
-    case RIGHT : 
-
-      break;
-    }
   }
 
   bool inBounds(float val, float low, float up){
@@ -59,9 +43,8 @@ public :
       this->speed.y += dir.y;
 
   }
-
   
-  void tick(bool** occupancy){
+  void tick(bool** occupancy, Ball* balls, int myIndex){
 
     vec g;
     g.x = 0.;
@@ -71,48 +54,52 @@ public :
     this->speed.y += g.y;
 
     if(this->pos.x + this->speed.x >= W*GRAN || this->pos.x + this->speed.x <= 0)
-      this->speed.x = -this->speed.x*0.8;    
+      this->speed.x = -this->speed.x*ATTENUATION;
 
     if(this->pos.y + this->speed.y >= H*GRAN || this->pos.y + this->speed.y <= 0)
-      this->speed.y = -this->speed.y*0.8;
+      this->speed.y = -this->speed.y*ATTENUATION;
+
+
+    //checking collisions with other balls (exept me, duh)
+    for(int i = 0 ; i < NB_BALLS ; i++){
+      if(i != myIndex){
+	int myGridX = (int)((this->pos.x)/(GRAN*1.));
+	int myGridY = (int)((this->pos.y)/(GRAN*1.));	
+
+	int myGridXNext = (int)((this->pos.x+this->speed.x*mass)/(GRAN*1.));
+	int myGridYNext = (int)((this->pos.y+this->speed.y*mass)/(GRAN*1.));	
+
+	int otherGridX = (int)((balls[i].pos.x)/(GRAN*1.));
+	int otherGridY = (int)((balls[i].pos.y)/(GRAN*1.));	
+
+	int otherGridXNext = (int)((balls[i].pos.x+balls[i].speed.x*balls[i].mass)/(GRAN*1.));
+	int otherGridYNext = (int)((balls[i].pos.y+balls[i].speed.y*balls[i].mass)/(GRAN*1.));
+
+	if(myGridXNext == otherGridX && myGridY == otherGridY)
+	  this->speed.x = -this->speed.x*ATTENUATION;
+
+	if(myGridYNext == otherGridY && myGridX == otherGridX)
+	  this->speed.y = -this->speed.y*ATTENUATION;
+
+      }
+    }
 
 
     this->pos.x += this->speed.x*mass;
-    this->pos.y += this->speed.y*mass;
+    this->pos.y += this->speed.y*mass;    
 
 
+    // Garde fou
+    if(this->pos.x >= W*GRAN)
+      this->pos.x = W*GRAN-1;
+    if(this->pos.x < 0)
+      this->pos.x = 0*GRAN;
 
-    // int gridXNext = (int)((this->pos.x+this->speed.x)/(GRAN*1.));
-    // int gridYNext = (int)((this->pos.y+this->speed.y)/(GRAN*1.));
+    if(this->pos.y >= H*GRAN)
+      this->pos.y = H*GRAN-1;
+    if(this->pos.y < 0)
+      this->pos.y = 0;
 
-    // int gridX = (int)((this->pos.x)/(GRAN*1.));
-    // int gridY = (int)((this->pos.y)/(GRAN*1.));
-
-    // std::cout << "GridX : " << gridX << std::endl;
-    // std::cout << "GridY : " << gridY << std::endl;
-
-    // std::cout << "GridXNext : " << gridXNext << std::endl;
-    // std::cout << "GridYNext : " << gridYNext << std::endl;
-
-    // if(inBounds(this->pos.x+this->speed.x, 0, (W)*GRAN)){
-    //   if(gridXNext == gridX)
-    // 	this->pos.x += this->speed.x;
-    //   else
-    // 	if(!occupancy[gridXNext][gridY])
-    // 	  this->pos.x += this->speed.x;
-    // }
-
-    // if(inBounds(this->pos.y+this->speed.y, 0, (H)*GRAN)){
-    //   if(gridYNext == gridY)
-    // 	this->pos.y += this->speed.y;
-    //   else
-    // 	if(!occupancy[gridYNext][gridY])
-    // 	  this->pos.y += this->speed.y;
-    // }
-
-    // std::cout << "pos x : "  << this->pos.x << std::endl;
-    // std::cout << "pos y : "  << this->pos.y << std::endl;
-    
   }
   
 };
@@ -124,11 +111,9 @@ void updateOccupancy(bool** occupancy, Ball* balls){
       occupancy[i][j] = false;
   
   for(int i = 0 ; i < NB_BALLS ; i++){
-
-      int gridX = (int)((balls[i].pos.x)/(GRAN*1.));
-      int gridY = (int)((balls[i].pos.y)/(GRAN*1.));
-
-      occupancy[gridX][gridY] = true;   
+    int gridX = (int)((balls[i].pos.x)/(GRAN*1.));
+    int gridY = (int)((balls[i].pos.y)/(GRAN*1.));
+    occupancy[gridX][gridY] = true;   
   }    
 
 }
@@ -169,7 +154,7 @@ int main(){
   balls = (Ball*)malloc(NB_BALLS*sizeof(Ball));
 
   for(int i = 0 ; i < NB_BALLS ; i++)
-    balls[i] = Ball(((i%W)*GRAN), (i/W)*GRAN, 0.5*(i+1));
+    balls[i] = Ball(((i%W)*GRAN), (i/W)*GRAN, 0.2*(i+1));
 
 
   vec v;
@@ -221,7 +206,7 @@ int main(){
     }
 
     for(int i = 0 ; i < NB_BALLS ; i++){
-      balls[i].tick(occupancy);
+      balls[i].tick(occupancy, balls, i);
     }
     
     updateOccupancy(occupancy, balls);
@@ -233,8 +218,6 @@ int main(){
   }
 
   endwin();
-
-  
 
   return EXIT_SUCCESS;
 }
