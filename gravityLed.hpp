@@ -6,7 +6,7 @@
 #define W 50
 #define H 50
 #define GRAN 100 // granularité simu (précision)
-#define NB_BALLS 5
+#define NB_BALLS 100
 #define ATTENUATION 0.8
 
 enum directions {UP=0, DOWN=1, RIGHT=2, LEFT=3};
@@ -46,7 +46,7 @@ public :
   void tick(bool** occupancy, Ball* balls, int myIndex){
 
     vec g;
-    g.x = 0.;
+    g.x = 0;
     g.y = 0.2;
 
     this->speed.x += g.x;
@@ -169,3 +169,4 @@ class gravityLed{
   }
 
 };
+     
