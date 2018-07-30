@@ -7,57 +7,111 @@
 #define W 8
 #define H 16
 #define GRAN 100 // granularité simu
-#define NB_BALLS 2
+#define NB_BALLS 15
+
+enum directions {UP=0, DOWN=1, RIGHT=2, LEFT=3};
+
 typedef struct vec{
   float x, y;
 } vec;
 
 class Ball{
 public :
-  float x, y;  //  m
+  vec pos;
   float mass;  //  kgs
-  vec speed; //  m/s
+  vec speed;
   
   Ball(float x, float y, float mass){
-    this->x = x;
-    this->y = y;
+    this->pos.x = x;
+    this->pos.y = y;
     this->mass = mass;
-    
-    this->speed.x = 0;
-    this->speed.y = 0;
-  }
-  
-  void applyForce(vec f){
-    speed.x = GRAN*f.x*mass;
-    speed.y = GRAN*f.y*mass;
+    this->speed.x = 0.;
+    this->speed.y = 0.;
   }
 
+  void move(int dir){
+    switch(dir){
+    case UP : 
+      
+      break;
+    case DOWN : 
+
+      break;
+    case LEFT : 
+
+      break;
+    case RIGHT : 
+
+      break;
+    }
+  }
+
+  bool inBounds(float val, float low, float up){
+    return (val > low && val < up);
+  }
+
+  void updateForceDir(vec dir){
+
+    if(inBounds(this->speed.x + dir.x, -50, 50))
+      this->speed.x += dir.x;
+
+    if(inBounds(this->speed.y + dir.y, -50, 50))
+      this->speed.y += dir.y;
+
+  }
+
+  
   void tick(bool** occupancy){
 
-    int gridX;
-    int gridY;
-    if((x > 0 && x < (W-1)*GRAN))
-      gridX = (int)((x+speed.x)/(GRAN*1.));
-    else
-      gridX = (int)((x)/(GRAN*1.));
+    vec g;
+    g.x = 0.;
+    g.y = 0.2;
+
+    this->speed.x += g.x;
+    this->speed.y += g.y;
+
+    if(this->pos.x + this->speed.x >= W*GRAN || this->pos.x + this->speed.x <= 0)
+      this->speed.x = -this->speed.x*0.8;    
+
+    if(this->pos.y + this->speed.y >= H*GRAN || this->pos.y + this->speed.y <= 0)
+      this->speed.y = -this->speed.y*0.8;
 
 
-    if((y > 0 && y < (H-1)*GRAN))
-      gridY = (int)((y+speed.y)/(GRAN*1.));
-    else
-      gridY = (int)((y)/(GRAN*1.));
-      
+    this->pos.x += this->speed.x*mass;
+    this->pos.y += this->speed.y*mass;
 
-    if( (x > 0 && x < (W-1)*GRAN) && !occupancy[gridX][gridY]){
-      x += speed.x;
-    }
 
-    if( (y > 0 && y < (H-1)*GRAN) && !occupancy[gridX][gridY]){
-      y += speed.y;
-    }
-    
-    // std::cout << "x : "  << x << std::endl;
-    // std::cout << "y : "  << y << std::endl;
+
+    // int gridXNext = (int)((this->pos.x+this->speed.x)/(GRAN*1.));
+    // int gridYNext = (int)((this->pos.y+this->speed.y)/(GRAN*1.));
+
+    // int gridX = (int)((this->pos.x)/(GRAN*1.));
+    // int gridY = (int)((this->pos.y)/(GRAN*1.));
+
+    // std::cout << "GridX : " << gridX << std::endl;
+    // std::cout << "GridY : " << gridY << std::endl;
+
+    // std::cout << "GridXNext : " << gridXNext << std::endl;
+    // std::cout << "GridYNext : " << gridYNext << std::endl;
+
+    // if(inBounds(this->pos.x+this->speed.x, 0, (W)*GRAN)){
+    //   if(gridXNext == gridX)
+    // 	this->pos.x += this->speed.x;
+    //   else
+    // 	if(!occupancy[gridXNext][gridY])
+    // 	  this->pos.x += this->speed.x;
+    // }
+
+    // if(inBounds(this->pos.y+this->speed.y, 0, (H)*GRAN)){
+    //   if(gridYNext == gridY)
+    // 	this->pos.y += this->speed.y;
+    //   else
+    // 	if(!occupancy[gridYNext][gridY])
+    // 	  this->pos.y += this->speed.y;
+    // }
+
+    // std::cout << "pos x : "  << this->pos.x << std::endl;
+    // std::cout << "pos y : "  << this->pos.y << std::endl;
     
   }
   
@@ -71,14 +125,12 @@ void updateOccupancy(bool** occupancy, Ball* balls){
   
   for(int i = 0 ; i < NB_BALLS ; i++){
 
-      int gridX = (int)((balls[i].x)/(GRAN*1.));
-      int gridY = (int)((balls[i].y)/(GRAN*1.));
+      int gridX = (int)((balls[i].pos.x)/(GRAN*1.));
+      int gridY = (int)((balls[i].pos.y)/(GRAN*1.));
 
-      occupancy[gridX][gridY] = true;
-      
-  }
-  
-    
+      occupancy[gridX][gridY] = true;   
+  }    
+
 }
 
 void display(bool** tab){
@@ -115,17 +167,15 @@ int main(){
 
   Ball* balls;
   balls = (Ball*)malloc(NB_BALLS*sizeof(Ball));
-  for(int i = 0 ; i < NB_BALLS ; i++){
-    balls[i] = Ball((i+1)*GRAN, (i+1)*GRAN, 1);// TODO bien faire init avec NB_BALLS plus grand que W
-  }
+
+  for(int i = 0 ; i < NB_BALLS ; i++)
+    balls[i] = Ball(((i%W)*GRAN), (i/W)*GRAN, 0.5*(i+1));
+
 
   vec v;
   v.x = 0;
   v.y = 0;
-  for(int i = 0 ; i < NB_BALLS ; i++){
-    balls[i].applyForce(v);
-  }
-  
+
   WINDOW* w = initscr();
   cbreak();
   nodelay(w, TRUE);
@@ -136,33 +186,38 @@ int main(){
   init_pair(1, COLOR_WHITE, COLOR_WHITE);//background
   init_pair(2, COLOR_RED, COLOR_RED);//led
   
-  bool updateForces = false;
   int c;
   while(true){
 
     c = wgetch(w);
     if(c == KEY_UP){
-      v.y = -1;
-      updateForces = true;
+      
+      v.x =  0;
+      v.y = -10;
+
+      for(int i = 0 ; i < NB_BALLS ; i++)
+      	balls[i].updateForceDir(v);
     }
     if(c == KEY_DOWN){
-      v.y = 1;
-      updateForces = true;
+      v.x =  0;
+      v.y = 10;
+
+      for(int i = 0 ; i < NB_BALLS ; i++)
+      	balls[i].updateForceDir(v);
     }
     if(c == KEY_LEFT){
-      v.x = -1;
-      updateForces = true;
+      v.x =  -10;
+      v.y = 0;
+
+      for(int i = 0 ; i < NB_BALLS ; i++)
+      	balls[i].updateForceDir(v);
     }
     if(c == KEY_RIGHT){
-      v.x = 1;
-      updateForces = true;
-    }
+      v.x =  10;
+      v.y = 0;
 
-    if(updateForces){
-      updateForces = false;
-      for(int i = 0 ; i < NB_BALLS ; i++){
-	balls[i].applyForce(v);
-      }      
+      for(int i = 0 ; i < NB_BALLS ; i++)
+      	balls[i].updateForceDir(v);
     }
 
     for(int i = 0 ; i < NB_BALLS ; i++){
@@ -174,7 +229,7 @@ int main(){
 
     clear();
     display(occupancy);
-    usleep(100000);
+    usleep(10000);
   }
 
   endwin();
