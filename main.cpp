@@ -1,6 +1,4 @@
 #include "gravityLed.hpp"
-#include <iostream>
-#include <stdlib.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <ncurses.h>
@@ -9,7 +7,7 @@ void display(bool** tab){
 
   for(int j = 0 ; j < H ; j++){
     for(int i = 0 ; i < W ; i++){
-
+      
       if(tab[i][j]){
 	attron(COLOR_PAIR(2));	
 	printw(" ");//LED
@@ -19,10 +17,8 @@ void display(bool** tab){
 	printw(" ");//background
       }
       
-      addch(' ');
-      
+      addch(' ');      
     }
-    
     addch('\n');
   }
 }
@@ -47,7 +43,7 @@ int main(){
   int c;
   while(true){
 
-    g.step(10000);
+    g.step(0., 0.2);
     bool** occupancy = g.getMatrix();
     
     c = wgetch(w);
@@ -74,6 +70,8 @@ int main(){
     
     clear();
     display(occupancy);
+    
+    usleep(10000);
   }
 
   endwin();
