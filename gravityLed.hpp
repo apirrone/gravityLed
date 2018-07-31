@@ -7,6 +7,7 @@
 #define ATTENUATION 0.8
 #define MAX_SPEED 50
 
+
 typedef struct vec{
   float x, y;
 } vec;
