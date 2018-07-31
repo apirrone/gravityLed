@@ -53,21 +53,21 @@ int main(){
     c = wgetch(w);
     if(c == KEY_UP){
       v.x =  0;
-      v.y = -10;
+      v.y = -2;
       g.updateForceDir(v);
     }
     if(c == KEY_DOWN){
       v.x =  0;
-      v.y = 10;
+      v.y = 2;
       g.updateForceDir(v);
     }
     if(c == KEY_LEFT){
-      v.x =  -10;
+      v.x =  -2;
       v.y = 0;
       g.updateForceDir(v);
     }
     if(c == KEY_RIGHT){
-      v.x =  10;
+      v.x = 2;
       v.y = 0;
       g.updateForceDir(v);
     }
