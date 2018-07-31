@@ -179,6 +179,13 @@ class gravityLed{
       centeredBallPos.y = balls[i].pos.y + (GRAN/2);
       
       float d = ledCenter.dist(centeredBallPos)/(GRAN*1.);
+      float inverted = d;
+      
+      if(d!=0)// éviter une division par 0
+	inverted = 1./d;
+
+      std::cout << (int)(d*255) << std::endl;
+      
       occupancy[gridX][gridY] = (int)(d*255);   
     }    
   }
