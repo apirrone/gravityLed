@@ -1,6 +1,6 @@
 # gravityLed
 
-![There is supposed to be a cool gif here](https://media.giphy.com/media/8AdqYCYtrNTIgP7AE1/giphy.gif)
+![There is supposed to be a cool gif here](https://media.giphy.com/media/8AdqYCYtrNTIgP7AE1/200w_d.gif)
 
 Tiny "physics engine" for displaying balls bouncing around walls and each others on a led matrix (or other use).
 
