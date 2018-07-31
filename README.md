@@ -15,7 +15,7 @@ gravityLed g;
 [...]
 while(true){
 	[...]
-	g.step();
+	g.step(gravityVector.x, gravityVector.y); // (0., 0.2) works well 
 	bool** occupancyMatrix = g.getMatrix();
 	// do stuff with matrix
 	[...]
