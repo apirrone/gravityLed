@@ -1,31 +1,18 @@
 #include <iostream>
 #include <stdlib.h>
 #include <stdlib.h>
-#include <math.h>
 
 #define W 5
 #define H 8
 #define GRAN 100 // granularité simu (précision)
-#define NB_BALLS 1
+#define NB_BALLS 3
 #define ATTENUATION 0.6
 
 enum directions {UP=0, DOWN=1, RIGHT=2, LEFT=3};
 
-// typedef struct vec{
-//   float x, y;
-//   float dist(vec v1, vec v2){
-//     return 0.;
-//   }
-// } vec;
-
-class vec{
-public:
-  float x;
-  float y;
-  float dist(vec v){
-    return sqrt( ((this->x - v.x)*(this->x - v.x)) + ((this->y - v.y)*(this->y - v.y)));
-  }
-};
+typedef struct vec{
+  float x, y;
+} vec;
 
 class Ball{
 public :
@@ -55,13 +42,19 @@ public :
 
   }
   
-  void tick(int** occupancy, Ball* balls, int myIndex, float x, float y){
-    
+  void tick(bool** occupancy, Ball* balls, int myIndex, float x, float y){
+
+   /* vec g;
+    g.x = 0.;
+    g.y = 0.2;*/
+
     this->speed.x += x;
     this->speed.y += y;
 
-    if(this->pos.x + this->speed.x >= W*GRAN || this->pos.x + this->speed.x <= 0)
+    if(this->pos.x + this->speed.x >= W*GRAN || this->pos.x + this->speed.x <= 0){
       this->speed.x = -this->speed.x*ATTENUATION;    
+
+    }
 
     if(this->pos.y + this->speed.y >= H*GRAN || this->pos.y + this->speed.y <= 0)
       this->speed.y = -this->speed.y*ATTENUATION;
@@ -129,7 +122,7 @@ class gravityLed{
     updateOccupancy(occupancy, balls);
   }
 
-  int** getMatrix(){
+  bool** getMatrix(){
     return occupancy;
   }
 
@@ -142,15 +135,15 @@ class gravityLed{
   private:
 
   Ball* balls;  
-  int** occupancy;
+  bool** occupancy;
 
   void init(){
 
-    occupancy = (int**)malloc(H*sizeof(int*));
+    occupancy = (bool**)malloc(H*sizeof(bool*));
     for(int i = 0 ; i < H ; i++){
-      occupancy[i] = (int*)malloc(W*sizeof(int));
+      occupancy[i] = (bool*)malloc(W*sizeof(bool));
       for(int j = 0 ; j < W ; j++)
-	occupancy[i][j] = 0;
+	occupancy[i][j] = false;
     }
 
     balls = (Ball*)malloc(NB_BALLS*sizeof(Ball));
@@ -160,37 +153,16 @@ class gravityLed{
     
   }
 
-  void updateOccupancy(int** occupancy, Ball* balls){
+  void updateOccupancy(bool** occupancy, Ball* balls){
 
     for(int i = 0 ; i < W ; i++)
       for(int j = 0 ; j < H ; j++)
-	occupancy[i][j] = 0;
+	occupancy[i][j] = false;
   
     for(int i = 0 ; i < NB_BALLS ; i++){
       int gridX = (int)((balls[i].pos.x)/(GRAN*1.));
       int gridY = (int)((balls[i].pos.y)/(GRAN*1.));
-
-      // ----- Pas utilisé pour l'instant -----
-      
-      // vec ledCenter;
-      // ledCenter.x = (gridX*GRAN+(GRAN/2));
-      // ledCenter.y = (gridY*GRAN+(GRAN/2));
-
-      // vec centeredBallPos;
-      // centeredBallPos.x = balls[i].pos.x + (GRAN/2);
-      // centeredBallPos.y = balls[i].pos.y + (GRAN/2);
-      
-      // float d = ledCenter.dist(centeredBallPos)/(GRAN*1.);
-      // float inverted = d;
-      
-      // if(d!=0)// éviter une division par 0
-      // 	inverted = 1./d;
-
-      
-      // ----- Pas utilisé pour l'instant -----
-      
-      occupancy[gridX][gridY] = 255;
-      
+      occupancy[gridX][gridY] = true;   
     }    
   }
 
