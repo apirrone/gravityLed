@@ -1,12 +1,11 @@
-#include <iostream>
-#include <stdlib.h>
 #include <stdlib.h>
 
-#define W 5
-#define H 8
-#define GRAN 100 // granularité simu (précision)
-#define NB_BALLS 3
-#define ATTENUATION 0.6
+#define W 50
+#define H 50
+#define GRAN 100 // granularity (precision) of underlying simulation, currently also affects speed (TODO needs to be fixed)
+#define NB_BALLS 30
+#define ATTENUATION 0.8
+#define MAX_SPEED 50
 
 enum directions {UP=0, DOWN=1, RIGHT=2, LEFT=3};
 
@@ -17,7 +16,7 @@ typedef struct vec{
 class Ball{
 public :
   vec pos;
-  float mass;
+  float mass;// more like gravity sensibility
   vec speed;
   
   Ball(float x, float y, float mass){
@@ -34,27 +33,24 @@ public :
 
   void updateForceDir(vec dir){
 
-    if(inBounds(this->speed.x + dir.x, -50, 50))
+    if(inBounds(this->speed.x + dir.x, -MAX_SPEED, MAX_SPEED))
       this->speed.x += dir.x;
 
-    if(inBounds(this->speed.y + dir.y, -50, 50))
+    if(inBounds(this->speed.y + dir.y, -MAX_SPEED, MAX_SPEED))
       this->speed.y += dir.y;
 
   }
   
   void tick(bool** occupancy, Ball* balls, int myIndex, float x, float y){
 
-   /* vec g;
-    g.x = 0.;
-    g.y = 0.2;*/
+    //gravity
+    vec g;
+    g.x = x;
+    g.y = y;
+    updateForceDir(g);
 
-    this->speed.x += x;
-    this->speed.y += y;
-
-    if(this->pos.x + this->speed.x >= W*GRAN || this->pos.x + this->speed.x <= 0){
+    if(this->pos.x + this->speed.x >= W*GRAN || this->pos.x + this->speed.x <= 0)
       this->speed.x = -this->speed.x*ATTENUATION;    
-
-    }
 
     if(this->pos.y + this->speed.y >= H*GRAN || this->pos.y + this->speed.y <= 0)
       this->speed.y = -this->speed.y*ATTENUATION;
@@ -63,6 +59,7 @@ public :
     //checking collisions with other balls (exept me, duh)
     for(int i = 0 ; i < NB_BALLS ; i++){
       if(i != myIndex){
+	
 	int myGridX = (int)((this->pos.x)/(GRAN*1.));
 	int myGridY = (int)((this->pos.y)/(GRAN*1.));	
 
@@ -72,9 +69,7 @@ public :
 	int otherGridX = (int)((balls[i].pos.x)/(GRAN*1.));
 	int otherGridY = (int)((balls[i].pos.y)/(GRAN*1.));	
 
-	int otherGridXNext = (int)((balls[i].pos.x+balls[i].speed.x*balls[i].mass)/(GRAN*1.));
-	int otherGridYNext = (int)((balls[i].pos.y+balls[i].speed.y*balls[i].mass)/(GRAN*1.));
-
+	
 	if(myGridXNext == otherGridX && myGridY == otherGridY)
 	  this->speed.x = -this->speed.x*ATTENUATION;
 
@@ -89,7 +84,7 @@ public :
     this->pos.y += this->speed.y*mass;    
 
 
-    // Garde fou
+    // Last check
     if(this->pos.x >= W*GRAN)
       this->pos.x = W*GRAN-1;
     if(this->pos.x < 0)
@@ -148,9 +143,11 @@ class gravityLed{
 
     balls = (Ball*)malloc(NB_BALLS*sizeof(Ball));
 
-    for(int i = 0 ; i < NB_BALLS ; i++)
-      balls[i] = Ball(((i%W)*GRAN), (i/W)*GRAN, 0.9*(i+1));
-    
+    for(int i = 0 ; i < NB_BALLS ; i++){
+      //balls[i] = Ball(((i%W)*GRAN), (i/W)*GRAN, 10);// init with same gravity sensibility
+      balls[i] = Ball(((i%W)*GRAN), (i/W)*GRAN, 0.9*(i+1));// init with different gravity sensibility
+    }
+     
   }
 
   void updateOccupancy(bool** occupancy, Ball* balls){
@@ -163,7 +160,8 @@ class gravityLed{
       int gridX = (int)((balls[i].pos.x)/(GRAN*1.));
       int gridY = (int)((balls[i].pos.y)/(GRAN*1.));
       occupancy[gridX][gridY] = true;   
-    }    
+    }
+    
   }
 
 };
