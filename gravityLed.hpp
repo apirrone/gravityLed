@@ -170,23 +170,27 @@ class gravityLed{
       int gridX = (int)((balls[i].pos.x)/(GRAN*1.));
       int gridY = (int)((balls[i].pos.y)/(GRAN*1.));
 
-      vec ledCenter;
-      ledCenter.x = (gridX*GRAN+(GRAN/2));
-      ledCenter.y = (gridY*GRAN+(GRAN/2));
+      // ----- Pas utilisé pour l'instant -----
+      
+      // vec ledCenter;
+      // ledCenter.x = (gridX*GRAN+(GRAN/2));
+      // ledCenter.y = (gridY*GRAN+(GRAN/2));
 
-      vec centeredBallPos;
-      centeredBallPos.x = balls[i].pos.x + (GRAN/2);
-      centeredBallPos.y = balls[i].pos.y + (GRAN/2);
+      // vec centeredBallPos;
+      // centeredBallPos.x = balls[i].pos.x + (GRAN/2);
+      // centeredBallPos.y = balls[i].pos.y + (GRAN/2);
       
-      float d = ledCenter.dist(centeredBallPos)/(GRAN*1.);
-      float inverted = d;
+      // float d = ledCenter.dist(centeredBallPos)/(GRAN*1.);
+      // float inverted = d;
       
-      if(d!=0)// éviter une division par 0
-	inverted = 1./d;
+      // if(d!=0)// éviter une division par 0
+      // 	inverted = 1./d;
 
-      std::cout << (int)(d*255) << std::endl;
       
-      occupancy[gridX][gridY] = (int)(d*255);   
+      // ----- Pas utilisé pour l'instant -----
+      
+      occupancy[gridX][gridY] = 255;
+      
     }    
   }
 
