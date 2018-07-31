@@ -7,8 +7,6 @@
 #define ATTENUATION 0.8
 #define MAX_SPEED 50
 
-enum directions {UP=0, DOWN=1, RIGHT=2, LEFT=3};
-
 typedef struct vec{
   float x, y;
 } vec;
