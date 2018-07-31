@@ -4,9 +4,9 @@ Tiny "physics engine" for displaying balls bouncing around walls and each others
 
 ## Make : 
 
-	- $ make
+	$ make
 
 
 ## Dependencies :
 
-	- ncurses
+- ncurses
