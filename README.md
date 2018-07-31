@@ -1,5 +1,7 @@
 # gravityLed
 
+![There is supposed to be a cool gif here](https://gph.is/2voF5w7)
+
 Tiny "physics engine" for displaying balls bouncing around walls and each others on a led matrix (or other use).
 
 It's very simple to use : 
