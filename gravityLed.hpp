@@ -1,12 +1,11 @@
 #include <iostream>
 #include <stdlib.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #define W 5
 #define H 8
 #define GRAN 100 // granularité simu (précision)
-#define NB_BALLS 10
+#define NB_BALLS 3
 #define ATTENUATION 0.6
 
 enum directions {UP=0, DOWN=1, RIGHT=2, LEFT=3};
@@ -43,17 +42,19 @@ public :
 
   }
   
-  void tick(bool** occupancy, Ball* balls, int myIndex){
+  void tick(bool** occupancy, Ball* balls, int myIndex, float x, float y){
 
-    vec g;
-    g.x = 0;
-    g.y = 0.2;
+   /* vec g;
+    g.x = 0.;
+    g.y = 0.2;*/
 
-    this->speed.x += g.x;
-    this->speed.y += g.y;
+    this->speed.x += x;
+    this->speed.y += y;
 
-    if(this->pos.x + this->speed.x >= W*GRAN || this->pos.x + this->speed.x <= 0)
+    if(this->pos.x + this->speed.x >= W*GRAN || this->pos.x + this->speed.x <= 0){
       this->speed.x = -this->speed.x*ATTENUATION;    
+
+    }
 
     if(this->pos.y + this->speed.y >= H*GRAN || this->pos.y + this->speed.y <= 0)
       this->speed.y = -this->speed.y*ATTENUATION;
@@ -114,12 +115,11 @@ class gravityLed{
 
   ~gravityLed(){}
   
-  void step(double microseconds){
+  void step(float x, float y){
     for(int i = 0 ; i < NB_BALLS ; i++)
-      balls[i].tick(occupancy, balls, i);
+      balls[i].tick(occupancy, balls, i, x, y);
 
     updateOccupancy(occupancy, balls);
-    usleep(microseconds);
   }
 
   bool** getMatrix(){
@@ -149,7 +149,7 @@ class gravityLed{
     balls = (Ball*)malloc(NB_BALLS*sizeof(Ball));
 
     for(int i = 0 ; i < NB_BALLS ; i++)
-      balls[i] = Ball(((i%W)*GRAN), (i/W)*GRAN, 3*(i+1));    
+      balls[i] = Ball(((i%W)*GRAN), (i/W)*GRAN, 0.9*(i+1));
     
   }
 
@@ -167,4 +167,3 @@ class gravityLed{
   }
 
 };
-     
