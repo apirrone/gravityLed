@@ -3,6 +3,10 @@
 #include <unistd.h>
 #include <ncurses.h>
 
+#define W 50
+#define H 50
+#define NB_BALLS 20
+
 void display(bool** tab){
 
   for(int j = 0 ; j < H ; j++){
@@ -24,7 +28,8 @@ void display(bool** tab){
 }
 
 int main(){
-  gravityLed g;
+	  
+  gravityLed g(W, H, NB_BALLS);
 
   WINDOW* w = initscr();
   cbreak();
