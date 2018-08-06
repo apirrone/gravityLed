@@ -40,7 +40,7 @@ public :
 
   }
   
-  void tick(bool** occupancy, Ball* balls, int myIndex, float x, float y){
+  void tick(bool** obstacles, Ball* balls, int myIndex, float x, float y){
 
     //gravity
     vec g;
@@ -48,26 +48,32 @@ public :
     g.y = y;
     updateForceDir(g);
 
+    int myGridX = (int)((this->pos.x)/(GRAN*1.));
+    int myGridY = (int)((this->pos.y)/(GRAN*1.));	
+
+    int myGridXNext = (int)((this->pos.x+this->speed.x*mass)/(GRAN*1.));
+    int myGridYNext = (int)((this->pos.y+this->speed.y*mass)/(GRAN*1.));	
+
+    //Borders handling
     if(this->pos.x + this->speed.x >= W*GRAN || this->pos.x + this->speed.x <= 0)
       this->speed.x = -this->speed.x*ATTENUATION;    
 
     if(this->pos.y + this->speed.y >= H*GRAN || this->pos.y + this->speed.y <= 0)
       this->speed.y = -this->speed.y*ATTENUATION;
 
+    //Obstacle handling
+    if((myGridXNext < W && myGridXNext > 0) &&  obstacles[myGridXNext][myGridY])
+      this->speed.x = -this->speed.x*ATTENUATION;
+
+    if((myGridYNext < H && myGridYNext > 0) && obstacles[myGridX][myGridYNext])
+      this->speed.y = -this->speed.y*ATTENUATION;
 
     //checking collisions with other balls (exept me, duh)
     for(int i = 0 ; i < NB_BALLS ; i++){
       if(i != myIndex){
 	
-	int myGridX = (int)((this->pos.x)/(GRAN*1.));
-	int myGridY = (int)((this->pos.y)/(GRAN*1.));	
-
-	int myGridXNext = (int)((this->pos.x+this->speed.x*mass)/(GRAN*1.));
-	int myGridYNext = (int)((this->pos.y+this->speed.y*mass)/(GRAN*1.));	
-
 	int otherGridX = (int)((balls[i].pos.x)/(GRAN*1.));
 	int otherGridY = (int)((balls[i].pos.y)/(GRAN*1.));	
-
 	
 	if(myGridXNext == otherGridX && myGridY == otherGridY)
 	  this->speed.x = -this->speed.x*ATTENUATION;
@@ -111,7 +117,7 @@ class gravityLed{
   
   void step(float x, float y){
     for(int i = 0 ; i < NB_BALLS ; i++)
-      balls[i].tick(occupancy, balls, i, x, y);
+      balls[i].tick(obstacles, balls, i, x, y);
 
     updateOccupancy(occupancy, balls);
   }
@@ -130,7 +136,8 @@ class gravityLed{
 
   Ball* balls;  
   bool** occupancy;
-
+  bool** obstacles;
+  
   void init(){
 
     occupancy = (bool**)malloc(H*sizeof(bool*));
@@ -138,6 +145,17 @@ class gravityLed{
       occupancy[i] = (bool*)malloc(W*sizeof(bool));
       for(int j = 0 ; j < W ; j++)
 	occupancy[i][j] = false;
+    }
+
+    obstacles = (bool**)malloc(H*sizeof(bool*));
+    for(int i = 0 ; i < H ; i++){
+      obstacles[i] = (bool*)malloc(W*sizeof(bool));
+      for(int j = 0 ; j < W ; j++){
+	if(i > 5 && j > 5 && i == j)
+	  obstacles[i][j] = true;
+	else
+	  obstacles[i][j] = false;
+      }
     }
 
     balls = (Ball*)malloc(NB_BALLS*sizeof(Ball));
@@ -152,8 +170,12 @@ class gravityLed{
   void updateOccupancy(bool** occupancy, Ball* balls){
 
     for(int i = 0 ; i < W ; i++)
-      for(int j = 0 ; j < H ; j++)
-	occupancy[i][j] = false;
+      for(int j = 0 ; j < H ; j++){
+	if(obstacles[i][j])
+	  occupancy[i][j] = true;
+	else
+	  occupancy[i][j] = false;
+      }
   
     for(int i = 0 ; i < NB_BALLS ; i++){
       int gridX = (int)((balls[i].pos.x)/(GRAN*1.));
