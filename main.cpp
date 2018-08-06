@@ -5,7 +5,7 @@
 
 #define W 50
 #define H 50
-#define NB_BALLS 20
+#define NB_BALLS 7
 
 void display(bool** tab){
 

@@ -11,7 +11,7 @@ It's very simple to use :
 ```c++
 #include "gravityLed.hpp"
 
-gravityLed g;
+gravityLed g(width, height, nb_balls);
 [...]
 while(true){
 	[...]
